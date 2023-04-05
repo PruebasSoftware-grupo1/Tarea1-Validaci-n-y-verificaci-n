@@ -1,1 +1,1 @@
-# Tarea1-Validaci-n-y-verificaci-n
+# Tarea1-Validacion-y-verificacion
