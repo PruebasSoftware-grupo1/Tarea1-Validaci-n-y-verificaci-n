@@ -66,20 +66,25 @@ def handle(client):
             client.close()
             nick = nicks[index]
             nick.remove(nick)
-            broadcast(f"{nick} has been BANNED.".encode())
+            notification = f"{nick} is gonne."
+
+            #notification = qwerty_positional_encode(notification)
+            broadcast(notification.encode())
             break
 
 def receive():
     while (True):
         client, address = server.accept()
         print(f"Connect with address {str(address)}")
-        client.send('NICK'.encode())
+        nick_request = 'NICK'
+        client.send(nick_request.encode())
         nickname = client.recv(1024).decode()
         nicks.append(nickname)
         clients.append(client)
         print(f"Nickname of the client is {nickname}")
-        broadcast(f"{nickname} join the chat.".encode())
-        client.send("You are connected to the chat".encode())
+
+        notification = f"{nickname} join the chat."
+        broadcast(notification.encode())
 
         thread = threading.Thread(target = handle, args = (client,))
         thread.start()

@@ -52,6 +52,7 @@ def receive():
             if message == 'NICK':
                 client.send(nickname.encode())
             else:
+                message = qwerty_positional_decode(message)
                 print(message)
         except:
             print("Error!")
@@ -61,6 +62,7 @@ def receive():
 def write():
     while True:
         message = f'{nickname}: {input()}'
+        message = qwerty_positional_encode(message)
         client.send(message.encode())
 
 receive_thread = threading.Thread(target = receive)
