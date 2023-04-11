@@ -1,5 +1,10 @@
 import socket
 import threading
+import logging
+import time
+
+logging.basicConfig(filename='client.log', level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s')
 
 nickname = input("Choose a nickname: ")
 client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -54,8 +59,12 @@ def receive():
             else:
                 message = qwerty_positional_decode(message)
                 print(message)
+            logging.info('message sent')
+        except Exception as e:
+            logging.error("Exception occurred", exc_info=True)
         except:
             print("Error!")
+            logging.warning('message couldn´t be sent')
             client.close()
             break
 
@@ -64,6 +73,7 @@ def write():
         message = f'{nickname}: {input()}'
         message = qwerty_positional_encode(message)
         client.send(message.encode())
+        
 
 receive_thread = threading.Thread(target = receive)
 receive_thread.start()

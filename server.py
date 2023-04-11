@@ -1,8 +1,12 @@
 import socket
 import threading
+import logging
 
+logging.basicConfig(filename='client.log', level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s')
 host = '127.0.0.1'
 port = 50000
+
 
 server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 server.bind((host,port))
