@@ -2,7 +2,7 @@ import socket
 import threading
 import logging
 
-logging.basicConfig(filename='client.log', level=logging.DEBUG,
+logging.basicConfig(filename='server.log', level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s')
 host = '127.0.0.1'
 port = 50000
@@ -61,36 +61,49 @@ def broadcast(message):
 
 def handle(client):
     while True:
+        if clients == []:
+            logging.info("Server down")
+            break
         try:
             message = client.recv(1024)
             broadcast(message)
         except:
             index = clients.index(client)
-            clients.remove(index)
+            clients.remove(client)
             client.close()
             nick = nicks[index]
-            nick.remove(nick)
+            nicks.remove(nick)
             notification = f"{nick} is gonne."
-
-            #notification = qwerty_positional_encode(notification)
             broadcast(notification.encode())
+            if clients == []:
+                logging.info("Server down")
+                server.close()
             break
 
 def receive():
     while (True):
-        client, address = server.accept()
-        print(f"Connect with address {str(address)}")
-        nick_request = 'NICK'
-        client.send(nick_request.encode())
-        nickname = client.recv(1024).decode()
-        nicks.append(nickname)
-        clients.append(client)
-        print(f"Nickname of the client is {nickname}")
+        try:
+            client, address = server.accept()
+            print(f"Connect with address {str(address)}")
+            nick_request = 'NICK'
+            client.send(nick_request.encode())
+            nickname = client.recv(1024).decode()
+            nicks.append(nickname)
+            clients.append(client)
+            print(f"Nickname of the client is {nickname}")
 
-        notification = f"{nickname} join the chat."
-        broadcast(notification.encode())
+            notification = f"{nickname} join the chat."
+            broadcast(notification.encode())
 
-        thread = threading.Thread(target = handle, args = (client,))
-        thread.start()
+            thread = threading.Thread(target = handle, args = (client,))
+            thread.start()
+        except Exception as e:
+            if e.args[0] == 10038:
+                logging.info("Server is closed")
+                break
+            else:
+                logging.info("Error!")
+
+
 print("Server On...")
 receive()
