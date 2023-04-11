@@ -61,16 +61,24 @@ def receive():
                 print(message)
             logging.info('message sent')
         except Exception as e:
+            if e.args[0] == 10053:
+                logging.info("The connection was closed correctly")
             logging.error("Exception occurred", exc_info=True)
+            client.close()
+            break
         except:
             print("Error!")
             logging.warning('message couldn´t be sent')
-            client.close()
             break
 
 def write():
     while True:
-        message = f'{nickname}: {input()}'
+        inpt = input()
+        if  inpt == '':
+            client.close()
+            logging.info("program finished")
+            break
+        message = f'{nickname}: {inpt}'
         message = qwerty_positional_encode(message)
         client.send(message.encode())
         
