@@ -1,14 +1,11 @@
 import socket
 import threading
 import logging
-import time
+#import time
+import sys
 
 logging.basicConfig(filename='client.log', level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s')
-
-nickname = input("Choose a nickname: ")
-client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-client.connect(('127.0.0.1',50000))
 
 def qwerty_positional_encode(message):
     qwerty_map = {
@@ -59,16 +56,17 @@ def receive():
             else:
                 message = qwerty_positional_decode(message)
                 print(message)
-            logging.info('message sent')
+                logging.info(f'Message received: {message}')
         except Exception as e:
             if e.args[0] == 10053:
                 logging.info("The connection was closed correctly")
-            logging.error("Exception occurred", exc_info=True)
-            client.close()
+                client.close()
+            else:
+                logging.error("Exception occurred", exc_info=True)
             break
         except:
             print("Error!")
-            logging.warning('message couldn´t be sent')
+            logging.warning('message couldn´t be received')
             break
 
 def write():
@@ -79,12 +77,26 @@ def write():
             logging.info("program finished")
             break
         message = f'{nickname}: {inpt}'
+        logging.info(f"Message send: {message}")
         message = qwerty_positional_encode(message)
+        logging.info(f"Message encoded: {message}")
         client.send(message.encode())
-        
 
-receive_thread = threading.Thread(target = receive)
-receive_thread.start()
+command = sys.argv
+if len(command) == 2:
+    nickname = str(sys.argv[1])
+elif len(command) == 1:
+    nickname = input("Choose a nickname: ")
+else:
+    logging.error("Using a bad command")
+client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+try:
+    client.connect(('127.0.0.1',50000))
+    receive_thread = threading.Thread(target = receive)
+    receive_thread.start()
 
-write_thread = threading.Thread(target = write)
-write_thread.start()
+    write_thread = threading.Thread(target = write)
+    write_thread.start()
+
+except Exception as e:
+    logging.error("Couldn't connect with the chat!")
