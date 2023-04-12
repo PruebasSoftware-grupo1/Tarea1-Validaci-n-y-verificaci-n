@@ -66,6 +66,7 @@ def handle(client):
             break
         try:
             message = client.recv(1024)
+            logging.info(f"Message received: {message}")
             broadcast(message)
         except:
             index = clients.index(client)
@@ -75,6 +76,7 @@ def handle(client):
             nicks.remove(nick)
             notification = f"{nick} is gonne."
             broadcast(notification.encode())
+            logging.info(f"Notification: {notification}")
             if clients == []:
                 logging.info("Server down")
                 server.close()
@@ -88,12 +90,14 @@ def receive():
             nick_request = 'NICK'
             client.send(nick_request.encode())
             nickname = client.recv(1024).decode()
+            logging.info(f"Nickname received: {nickname}")
             nicks.append(nickname)
             clients.append(client)
             print(f"Nickname of the client is {nickname}")
 
             notification = f"{nickname} join the chat."
             broadcast(notification.encode())
+            logging.info(f"Notification send: {notification}")
 
             thread = threading.Thread(target = handle, args = (client,))
             thread.start()
@@ -102,8 +106,8 @@ def receive():
                 logging.info("Server is closed")
                 break
             else:
-                logging.info("Error!")
+                logging.error("Error!",exc_info=True)
 
 
-print("Server On...")
+print("Starting SERVER!!!!")
 receive()
